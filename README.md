@@ -1,6 +1,6 @@
 # hashr
 
-A new Flutter project.
+Hashr helps generate hashed version of your password, makes it a stronger password to enter on your accounts, apps and/or sites that requires credentials. It combines your username and password, then hashes it using the SHA-1 encryption. This application only converts your credentials but never saves the password. It only saves the account type (Google, Facebook, Microsoft accounts), username, and the hash converted password.
 
 ## Getting Started
 
