@@ -6,24 +6,26 @@ part 'account.g.dart';
 @JsonSerializable()
 class Account extends ModelBase {
   @JsonKey(name: "apporsitename")
-  String? apporsitename = "";
+  String? apporsitename;
+  @JsonKey(name: "apporsitetype")
+  String? apporsitetype;
   @JsonKey(name: "description")
-  String? desciption = "";
+  String? desciption;
   @JsonKey(name: "hash")
-  String? hash = "";
+  String? hash;
   @JsonKey(name: "username")
-  String? username = "";
+  String? username;
 
   @JsonKey(ignore: true)
   @JsonKey(name: "salt")
-  String? salt = "";
+  String? salt;
 
   Account(
       {id,
       required this.apporsitename,
-      this.desciption,
-      this.hash,
-      this.salt,
+      this.desciption = "",
+      this.hash = "",
+      this.salt = "",
       required this.username});
 
   factory Account.fromJson(Map<String, dynamic> json) =>
