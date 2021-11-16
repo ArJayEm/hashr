@@ -36,6 +36,8 @@ class _AddAcountState extends State<AddAcount> {
   final _ctrlUsername = TextEditingController();
   final _ctrlPassword = TextEditingController();
 
+  final FocusNode _focusPassword = FocusNode();
+
   final _formKey = GlobalKey<FormState>();
   String? _password;
   bool _obscureText = true;
@@ -132,7 +134,7 @@ class _AddAcountState extends State<AddAcount> {
                         },
                       ),
                       const SizedBox(height: 10),
-                      _isEdit ? TextFormField(
+                      TextFormField(
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.all(5),
                           icon: const Icon(Icons.password, color: Colors.green),
@@ -149,6 +151,7 @@ class _AddAcountState extends State<AddAcount> {
                                 : Icons.visibility_off),
                           ),
                         ),
+                        focusNode: _focusPassword,
                         obscureText: _obscureText,
                         keyboardType: TextInputType.visiblePassword,
                         textCapitalization: TextCapitalization.words,
@@ -172,7 +175,7 @@ class _AddAcountState extends State<AddAcount> {
                           //       extentOffset: _ctrlPassword.text.length);
                           // }
                         },
-                      ) : const SizedBox(),
+                      ),
                     ],
                   ),
                 ),
@@ -189,6 +192,7 @@ class _AddAcountState extends State<AddAcount> {
       _ctrlDescription.text = _account.desciption ?? "";
       _ctrlHash.text = _account.hash ?? "";
       _ctrlUsername.text = _account.username ?? "";
+      _focusPassword.requestFocus();
     });
   }
 
