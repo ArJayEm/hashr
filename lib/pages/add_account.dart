@@ -206,6 +206,15 @@ class _AddAcountState extends State<AddAcount> {
       CollectionReference list =
           FirebaseFirestore.instance.collection("accounts");
       if (_account.id.isNullOrEmpty()) {
+          var data = _account.toJson();
+          list.add(data).then((value) {
+            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+                overlays: SystemUiOverlay.values);
+            _showProgressUi(false, "");
+            Navigator.pop(context);
+          }).catchError((error) {
+            _showProgressUi(false, "Failed to add account: $error.");
+          });
       } else {
         _account.modifiedOn = DateTime.now();
         list.doc(_account.id).update(_account.toJson()).then((value) {
