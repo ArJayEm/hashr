@@ -132,7 +132,7 @@ class _AddAcountState extends State<AddAcount> {
                         },
                       ),
                       const SizedBox(height: 10),
-                      TextFormField(
+                      _isEdit ? TextFormField(
                         decoration: InputDecoration(
                           contentPadding: const EdgeInsets.all(5),
                           icon: const Icon(Icons.password, color: Colors.green),
@@ -172,7 +172,7 @@ class _AddAcountState extends State<AddAcount> {
                           //       extentOffset: _ctrlPassword.text.length);
                           // }
                         },
-                      ),
+                      ) : const SizedBox(),
                     ],
                   ),
                 ),
