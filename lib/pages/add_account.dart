@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -199,7 +202,12 @@ class _AddAcountState extends State<AddAcount> {
   void _saveRecord() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _account.salt.generateBase64Salt();
+        if (_account.salt!.isNullOrEmpty()) {
+          Fluttertoast.showToast(msg: "Generating salt...");
+          Random _random = Random.secure();
+          var values = List<int>.generate(32, (i) => _random.nextInt(256));
+          _account.salt = base64Url.encode(values); //generateBase64Salt();
+        }
         _account.hash.generateHash(_account.salt!, _password!);
       });
       _showProgressUi("Saving...");

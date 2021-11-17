@@ -15,8 +15,6 @@ class Account extends ModelBase {
   String? hash;
   @JsonKey(name: "username")
   String? username;
-
-  @JsonKey(ignore: true)
   @JsonKey(name: "salt")
   String? salt;
 
