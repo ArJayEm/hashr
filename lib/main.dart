@@ -7,12 +7,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-//import 'package:flutter/services.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-// ignore: import_of_legacy_library_into_null_safe
 import 'package:global_configuration/global_configuration.dart';
-import 'package:hashr/helpers/extensions/format_extension.dart';
 import 'package:hashr/pages/add_account.dart';
 
 import 'models/account.dart';
@@ -169,10 +167,10 @@ class _MyHomePageState extends State<MyHomePage> {
                             children: snapshot.data!.docs.map(
                               (DocumentSnapshot document) {
                                 var data = document.data();
-                                Account acc = Account.fromJson(
+                                Account account = Account.fromJson(
                                     data as Map<String, dynamic>);
                                 //if (_bill.payerIds.toString().contains("$_userId")) {
-                                acc.id = document.id;
+                                account.id = document.id;
                                 return Column(
                                   crossAxisAlignment:
                                       CrossAxisAlignment.stretch,
@@ -181,10 +179,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                   children: [
                                     ListTile(
                                       //isThreeLine: true,
+                                      dense: true,
                                       leading: const CircleAvatar(),
-                                      title: Text(acc.apporsitename!),
+                                      title: Text(account.apporsitename!),
                                       //subtitle: Text('Created On: ${DateTime.fromMillisecondsSinceEpoch(data['created_on']).format()}'),
-                                      subtitle: Text(acc.username!),
+                                      subtitle: Text(account.username!),
                                       //onTap: () {},
                                       trailing: SizedBox(
                                         width: 150,
@@ -192,9 +191,18 @@ class _MyHomePageState extends State<MyHomePage> {
                                           mainAxisSize: MainAxisSize.min,
                                           children: [
                                             IconButton(
-                                                onPressed: () {},
-                                                icon: const Icon(
-                                                    Icons.visibility)),
+                                                onPressed: () {
+                                                  Clipboard.setData(
+                                                          ClipboardData(
+                                                              text:
+                                                                  account.hash))
+                                                      .then((_) {
+                                                    Fluttertoast.showToast(
+                                                        msg:
+                                                            "Hash copied to clipboard");
+                                                  });
+                                                },
+                                                icon: const Icon(Icons.copy)),
                                             const Spacer(),
                                             IconButton(
                                                 onPressed: () {
@@ -202,7 +210,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (context) =>
-                                                          AddAcount(acc),
+                                                          AddAcount(account),
                                                     ),
                                                   );
                                                 },
@@ -211,7 +219,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                             const Spacer(),
                                             IconButton(
                                                 onPressed: () {
-                                                  _delete(_account.id);
+                                                  _delete(account.id);
                                                 },
                                                 icon: const Icon(Icons.delete,
                                                     color: Colors.red)),
@@ -238,8 +246,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void handleClick(int item) {
-    printIfDebug(item);
-
     switch (item) {
       case 0:
         Navigator.push(
@@ -255,20 +261,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   getAccounts(value) {
-    _showProgressUi(true, "");
-  }
-
-  void printIfDebug(text) {
-    if (kDebugMode) {
-      print("print: $text");
-    }
-  }
-
-  _showProgressUi(bool isLoading, String msg) {
-    if (!msg.isNullOrEmpty()) {
-      Fluttertoast.showToast(msg: msg);
-    }
-    setState(() => _isLoading = isLoading);
+    _showProgressUi("");
   }
 
   _delete(String? id) async {
@@ -286,7 +279,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
           TextButton(
             onPressed: () async {
-              _showProgressUi(true, "Deleting record...");
+              _showProgressUi("Deleting record...");
               try {
                 String collection = widget.title.toLowerCase();
 
@@ -295,14 +288,14 @@ class _MyHomePageState extends State<MyHomePage> {
                     .doc(id)
                     .delete()
                     .then((_) {
-                  _showProgressUi(false, "Record deleted");
+                  _showProgressUi("Record deleted");
                   Navigator.pop(context);
                   Navigator.pop(context);
                 });
               } on FirebaseAuthException catch (e) {
-                _showProgressUi(false, "${e.message}.");
+                _showProgressUi("${e.message}.");
               } catch (e) {
-                _showProgressUi(false, "$e.");
+                _showProgressUi("$e.");
               }
             },
             child: const Text('Ok'),
@@ -310,5 +303,10 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
     );
+  }
+
+  _showProgressUi(String msg) {
+    Fluttertoast.showToast(msg: msg);
+    setState(() => _isLoading = !_isLoading);
   }
 }

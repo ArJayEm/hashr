@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypt/crypt.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hashr/models/account.dart';
 import '/helpers/extensions/format_extension.dart';
+import '/helpers/extensions/security.dart';
 
 Future<bool?> showAddRecord(context, data) async {
   return await showModalBottomSheet<bool?>(
@@ -20,6 +19,7 @@ Future<bool?> showAddRecord(context, data) async {
 class AddAcount extends StatefulWidget {
   final Account account;
 
+  // ignore: use_key_in_widget_constructors
   const AddAcount(this.account);
 
   @override
@@ -199,65 +199,41 @@ class _AddAcountState extends State<AddAcount> {
   void _saveRecord() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
-        _account.hash = _generateHash();
+        _account.salt.generateBase64Salt();
+        _account.hash.generateHash(_account.salt!, _password!);
       });
-      _showProgressUi(true, "Saving");
+      _showProgressUi("Saving...");
 
       CollectionReference list =
           FirebaseFirestore.instance.collection("accounts");
       if (_account.id.isNullOrEmpty()) {
-          var data = _account.toJson();
-          list.add(data).then((value) {
-            SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
-                overlays: SystemUiOverlay.values);
-            _showProgressUi(false, "");
-            Navigator.pop(context);
-          }).catchError((error) {
-            _showProgressUi(false, "Failed to add account: $error.");
-          });
+        var data = _account.toJson();
+        list.add(data).then((value) {
+          SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
+              overlays: SystemUiOverlay.values);
+          _showProgressUi("Account saved.");
+          Navigator.pop(context);
+        }).catchError((error) {
+          _showProgressUi("Failed to add account: $error.");
+        });
       } else {
         _account.modifiedOn = DateTime.now();
         list.doc(_account.id).update(_account.toJson()).then((value) {
           SystemChrome.setEnabledSystemUIMode(SystemUiMode.manual,
               overlays: SystemUiOverlay.values);
           Navigator.pop(context);
-          //_updateAccountingDates();
-          _showProgressUi(false, "Account updated.");
+          _showProgressUi("Account updated.");
         }).catchError((error) {
-          _showProgressUi(false, "Failed to update Account: $error.");
+          _showProgressUi("Failed to update Account: $error.");
         });
       }
-
-      _showProgressUi(false, "Account ${_isEdit ? "updated" : "saved"}.");
-
-      Navigator.pop(context);
     } else {
       Fluttertoast.showToast(msg: "Please fill required fields.");
     }
   }
 
-  String _generateHash() {
-    String hashedPassword = "";
-
-    if (!_password.isNullOrEmpty()) {
-      _showProgressUi(true, "Generating hash...");
-      hashedPassword = Crypt.sha256(_password!).toString();
-      printIfDebug(hashedPassword);
-    }
-
-    return hashedPassword;
-  }
-
-  void printIfDebug(text) {
-    if (kDebugMode) {
-      print("print: $text");
-    }
-  }
-
-  _showProgressUi(bool isLoading, String msg) {
-    if (!msg.isNullOrEmpty()) {
-      Fluttertoast.showToast(msg: msg);
-    }
-    setState(() => _isLoading = isLoading);
+  _showProgressUi(String msg) {
+    Fluttertoast.showToast(msg: msg);
+    setState(() => _isLoading = !_isLoading);
   }
 }
